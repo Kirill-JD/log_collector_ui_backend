@@ -1,4 +1,4 @@
-package ru.ycan.log_collector_ui_backend;
+package ru.ycan.log.collector.ui.backend;
 
 import org.springframework.boot.SpringApplication;
 
