@@ -12,6 +12,8 @@ import ru.ycan.handler.AuthenticationHandler;
 import ru.ycan.rest.response.AuthenticationResponse;
 import ru.ycan.util.JwtUtil;
 
+import static ru.ycan.enums.Messages.AUTHORIZATION_SUCCESSFUL;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class AuthenticationHandlerImpl implements AuthenticationHandler {
                                                                                    authenticationDTO.password()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationDTO.email());
         final String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        log.info(AUTHORIZATION_SUCCESSFUL.getMessage(), userDetails.getUsername());
         return new AuthenticationResponse(jwt);
     }
 }
