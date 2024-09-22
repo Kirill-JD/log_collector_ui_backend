@@ -1,0 +1,11 @@
+server:
+  port: 8000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: postgres
+    password: password
+
+jwt:
+  ttl: 3600000 # milliseconds -> 1 hour
