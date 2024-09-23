@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler {
                                                                                           field.getDefaultMessage());
         log.error(message, exception);
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(message));
     }
 
@@ -41,8 +42,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(HttpMessageNotReadableException exception) {
         log.error(AUTHORIZATION_DATA_MISSING.getMessage(), exception);
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(AUTHORIZATION_DATA_MISSING.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleException(HttpMediaTypeNotSupportedException exception) {
+        log.error(UNSUPPORTED_CONTENT_TYPE.getMessage(), exception);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(UNSUPPORTED_CONTENT_TYPE.getMessage()));
     }
 
     @ExceptionHandler(DisabledException.class)

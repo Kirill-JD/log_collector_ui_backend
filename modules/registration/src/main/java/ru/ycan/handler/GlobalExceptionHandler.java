@@ -1,56 +1,57 @@
 package ru.ycan.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.ycan.rest.response.ErrorResponse;
 
-import static ru.ycan.enums.Errors.INTERNAL_SERVER_ERROR;
-import static ru.ycan.enums.Errors.REGISTRATION_DATA_MISSING;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
+import static ru.ycan.enums.Errors.*;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    public ResponseEntity<ErrorResponse> handleException(MethodArgumentNotValidException exception) {
-//        var field = exception.getBindingResult().getFieldError();
-//        var message = field == null ? ERROR_BY_VALIDATION_AUTHORIZATION_DATA.getMessage()
-//                                    : INCORRECT_AUTHORIZATION_DATA.getMessage().formatted(field.getField(),
-//                                                                                          field.getDefaultMessage());
-//        log.error(message, exception);
-//        return ResponseEntity
-//                .status(HttpStatus.FORBIDDEN)
-//                .body(new ErrorResponse(message));
-//    }
+    private static final Pattern PATTERN = Pattern.compile("=\\((.+)\\) already exists");
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleException(MethodArgumentNotValidException exception) {
+        var field = exception.getBindingResult().getFieldError();
+        var message = field == null ? ERROR_BY_VALIDATION_REGISTRATION_DATA.getMessage()
+                                    : INCORRECT_REGISTRATION_DATA.getMessage().formatted(field.getField(),
+                                                                                          field.getDefaultMessage());
+        log.error(message, exception);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(message));
+    }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleException(DataIntegrityViolationException exception) {
+        var valueDuplicate = getValueDuplicate(exception.getMessage());
+        var message = valueDuplicate.map(s -> DUPLICATE_VALUE_REGISTRATION_DATA.getMessage().formatted(s))
+                                    .orElseGet(INCORRECT_VALUE_REGISTRATION_DATA::getMessage);
+        log.error(message, exception);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(message));
+    }
 
-
-
-//
-//    @ExceptionHandler(BadCredentialsException.class)
-//    public ResponseEntity<ErrorResponse> handleException(BadCredentialsException exception) {
-//        log.error(INVALID_AUTHORIZATION_DATA.getMessage(), exception);
-//        return ResponseEntity
-//                .status(HttpStatus.FORBIDDEN)
-//                .body(new ErrorResponse(INVALID_AUTHORIZATION_DATA.getMessage()));
-//    }
-//
-//    @ExceptionHandler(DisabledException.class)
-//    public ResponseEntity<ErrorResponse> handleException(DisabledException exception) {
-//        log.error(USER_NOT_ACTIVE.getMessage(), exception);
-//        return ResponseEntity
-//                .status(HttpStatus.FORBIDDEN)
-//                .body(new ErrorResponse(USER_NOT_ACTIVE.getMessage()));
-//    }
-
-    // HttpMediaTypeNotSupportedException (text body)
-    // DataIntegrityViolationException (дубль)
-
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleException(HttpMediaTypeNotSupportedException exception) {
+        log.error(UNSUPPORTED_CONTENT_TYPE.getMessage(), exception);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(UNSUPPORTED_CONTENT_TYPE.getMessage()));
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleException(HttpMessageNotReadableException exception) {
@@ -66,5 +67,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR.getMessage()));
+    }
+
+    private Optional<String> getValueDuplicate(String message) {
+        final var matcher = PATTERN.matcher(message);
+        return matcher.find() ? Optional.of(matcher.group(1))
+                              : Optional.empty();
     }
 }
