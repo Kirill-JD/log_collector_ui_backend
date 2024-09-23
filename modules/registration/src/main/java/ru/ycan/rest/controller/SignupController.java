@@ -7,19 +7,18 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ycan.dto.AuthenticationDTO;
-import ru.ycan.handler.AuthenticationHandler;
-import ru.ycan.rest.response.AuthenticationResponse;
+import ru.ycan.dto.SignupDTO;
+import ru.ycan.dto.UserDTO;
+import ru.ycan.handler.RegistrationHandler;
 
 @Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
-public class AuthenticationController {
-    private final AuthenticationHandler handler;
-
-    @PostMapping("/authenticate")
-    public AuthenticationResponse createAuthenticationToken(@RequestBody @Valid AuthenticationDTO authenticationDTO) {
-        return handler.authentication(authenticationDTO);
+public class SignupController {
+    private final RegistrationHandler handler;
+    @PostMapping("/sign-up")
+    public UserDTO signupUser(@RequestBody @Valid SignupDTO signupDTO) {
+        return handler.registration(signupDTO);
     }
 }
