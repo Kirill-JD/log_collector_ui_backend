@@ -38,11 +38,11 @@ dependencies {
 }
 
 application {
-    mainClass.set("ru.ycan.Application")
+    mainClass.set("ru.ycan.add.project.Application")
 }
 
 springBoot {
-    mainClass.set("ru.ycan.Application")
+    mainClass.set("ru.ycan.add.project.Application")
 }
 
 tasks.withType<Test> {

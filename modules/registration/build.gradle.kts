@@ -22,9 +22,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:3.3.3")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
 
+    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.projectlombok:lombok")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
@@ -38,11 +38,11 @@ dependencies {
 }
 
 application {
-    mainClass.set("ru.ycan.Application")
+    mainClass.set("ru.ycan.registration.Application")
 }
 
 springBoot {
-    mainClass.set("ru.ycan.Application")
+    mainClass.set("ru.ycan.registration.Application")
 }
 
 tasks.withType<Test> {
